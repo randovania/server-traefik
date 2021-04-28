@@ -24,7 +24,7 @@ services:
       - "traefik.http.services.node_exporter.loadbalancer.server.port=9100"
 
   traefik:
-    image: "traefik:v2.3"
+    image: "traefik:v2.4"
     container_name: "traefik"
     command:
       - "--accesslog=true"
