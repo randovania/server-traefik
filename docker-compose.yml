@@ -5,6 +5,9 @@ networks:
   web:
     external: true
 
+volumes:
+  portainer_data:
+
 services:
   node-exporter:
     image: "quay.io/prometheus/node-exporter"
@@ -23,6 +26,24 @@ services:
       - "traefik.http.routers.node_exporter.middlewares=node_exporter"
       - "traefik.http.middlewares.node_exporter.basicauth.users=admin:${DASHBOARD_PASSWORD}"
       - "traefik.http.services.node_exporter.loadbalancer.server.port=9100"
+    networks:
+      - web
+
+  portainer:
+    image: portainer/portainer-ce:2.1.1
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    labels:
+      # Frontend
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`${PORTAINER_DOMAIN}`)"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.tls.certresolver=myresolver"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
     networks:
       - web
 
