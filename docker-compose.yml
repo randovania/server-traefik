@@ -8,7 +8,6 @@ networks:
 services:
   node-exporter:
     image: "quay.io/prometheus/node-exporter"
-    network_mode: host
     pid: host
     restart: always
     volumes:
@@ -21,7 +20,11 @@ services:
       - "traefik.http.routers.node_exporter.rule=Host(`${DOMAIN}`) && PathPrefix(`/host-metrics`)"
       - "traefik.http.routers.node_exporter.entrypoints=websecure"
       - "traefik.http.routers.node_exporter.tls.certresolver=myresolver"
+      - "traefik.http.routers.node_exporter.middlewares=node_exporter"
+      - "traefik.http.middlewares.node_exporter.basicauth.users=admin:${DASHBOARD_PASSWORD}"
       - "traefik.http.services.node_exporter.loadbalancer.server.port=9100"
+    networks:
+      - web
 
   traefik:
     image: "traefik:v2.4"
