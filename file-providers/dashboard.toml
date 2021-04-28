@@ -1,0 +1,26 @@
+[http]
+    [http.routers]
+        [http.routers.forceHttps]
+            rule = "PathPrefix(`/`)"
+            entrypoints = ["web"]
+            middlewares = ["forceHttps"]
+            service = "noop@internal"
+
+        [http.routers.dashboard]
+            rule = "Host(`randovania.metroidprime.run`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+            entrypoints = ["websecure"]
+            middlewares = ["dashboard-auth"]
+            service = "api@internal"
+
+        [http.routers.dashboard.tls]
+            certresolver = "myresolver"
+
+    [http.middlewares]
+        [http.middlewares.forceHttps.redirectScheme]
+            scheme = "https"
+            permanent = true
+
+        [http.middlewares.dashboard-auth.basicAuth]
+            users = [
+                "admin:{{ env `DASHBOARD_PASSWORD` }}",
+            ]

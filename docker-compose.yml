@@ -1,0 +1,57 @@
+version: "3.3"
+
+
+networks:
+  web:
+    external: true
+
+services:
+  node-exporter:
+    image: "quay.io/prometheus/node-exporter"
+    network_mode: host
+    pid: host
+    restart: always
+    volumes:
+      - "/:/host:ro,rslave"
+    command:
+      - "--path.rootfs=/host"
+      - "--web.telemetry-path=/host-metrics"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node_exporter.rule=Host(`${DOMAIN}`) && PathPrefix(`/host-metrics`)"
+      - "traefik.http.routers.node_exporter.entrypoints=websecure"
+      - "traefik.http.routers.node_exporter.tls.certresolver=myresolver"
+      - "traefik.http.services.node_exporter.loadbalancer.server.port=9100"
+
+  traefik:
+    image: "traefik:v2.3"
+    container_name: "traefik"
+    command:
+      - "--accesslog=true"
+      - "--log.level=INFO"
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--metrics.prometheus.manualrouting=true"
+      - "--global.sendAnonymousUsage"
+      - "--providers.file.directory=/file-providers"
+      - "--providers.file.watch=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./file-providers:/file-providers"
+      - "/var/letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - DASHBOARD_PASSWORD
+    networks:
+      - web
+    restart: always
