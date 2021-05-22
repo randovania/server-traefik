@@ -23,7 +23,7 @@ services:
       - "traefik.http.routers.node_exporter.rule=Host(`${DOMAIN}`) && PathPrefix(`/host-metrics`)"
       - "traefik.http.routers.node_exporter.entrypoints=websecure"
       - "traefik.http.routers.node_exporter.tls.certresolver=myresolver"
-      - "traefik.http.routers.node_exporter.middlewares=dashboard_auth"
+      - "traefik.http.routers.node_exporter.middlewares=dashboard-auth@file"
       - "traefik.http.services.node_exporter.loadbalancer.server.port=9100"
     networks:
       - web
@@ -40,7 +40,7 @@ services:
       - "traefik.http.routers.sqlite_web_staging.rule=Host(`${DOMAIN}`) && PathPrefix(`/sqlite-web/staging`)"
       - "traefik.http.routers.sqlite_web_staging.entrypoints=websecure"
       - "traefik.http.routers.sqlite_web_staging.tls.certresolver=myresolver"
-      - "traefik.http.routers.sqlite_web_staging.middlewares=dashboard_auth"
+      - "traefik.http.routers.sqlite_web_staging.middlewares=dashboard-auth@file"
       - "traefik.http.services.sqlite_web_staging.loadbalancer.server.port=8080"
     networks:
       - web
@@ -57,7 +57,7 @@ services:
       - "traefik.http.routers.sqlite_web_production.rule=Host(`${DOMAIN}`) && PathPrefix(`/sqlite-web/production`)"
       - "traefik.http.routers.sqlite_web_production.entrypoints=websecure"
       - "traefik.http.routers.sqlite_web_production.tls.certresolver=myresolver"
-      - "traefik.http.routers.sqlite_web_production.middlewares=dashboard_auth"
+      - "traefik.http.routers.sqlite_web_production.middlewares=dashboard-auth@file"
       - "traefik.http.services.sqlite_web_production.loadbalancer.server.port=8080"
     networks:
       - web
@@ -100,8 +100,6 @@ services:
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.myresolver.acme.email=${LETSENCRYPT_EMAIL}"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-    labels:
-      - "traefik.http.middlewares.dashboard_auth.basicauth.users=admin:${DASHBOARD_PASSWORD}"
     ports:
       - "80:80"
       - "443:443"
