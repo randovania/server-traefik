@@ -33,10 +33,14 @@ services:
     restart: always
     volumes:
       - "/var/randovania/staging/data:/data"
-    environment:
-      SQLITE_DATABASE: data.db
-    command: 
-      - "-u /sqlite-web/staging"
+    command:
+      - sqlite_web
+      - "-H"
+      - "0.0.0.0"
+      - "-u"
+      - "/sqlite-web/staging"
+      - "-x"
+      - data.db
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sqlite_web_staging.rule=Host(`${DOMAIN}`) && PathPrefix(`/sqlite-web/staging`)"
@@ -52,10 +56,14 @@ services:
     restart: always
     volumes:
       - "/var/randovania/production/data:/data"
-    environment:
-      SQLITE_DATABASE: data.db
-    command: 
-      - "-u /sqlite-web/production"
+    command:
+      - sqlite_web
+      - "-H"
+      - "0.0.0.0"
+      - "-u"
+      - "/sqlite-web/production"
+      - "-x"
+      - data.db
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sqlite_web_production.rule=Host(`${DOMAIN}`) && PathPrefix(`/sqlite-web/production`)"
