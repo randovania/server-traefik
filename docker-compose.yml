@@ -35,13 +35,14 @@ services:
       - "/var/randovania/staging/data:/data"
     environment:
       SQLITE_DATABASE: data.db
+    command: 
+      - "-u /sqlite-web/staging"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sqlite_web_staging.rule=Host(`${DOMAIN}`) && PathPrefix(`/sqlite-web/staging`)"
       - "traefik.http.routers.sqlite_web_staging.entrypoints=websecure"
       - "traefik.http.routers.sqlite_web_staging.tls.certresolver=myresolver"
-      - "traefik.http.routers.sqlite_web_staging.middlewares=dashboard-auth@file,stripprefix-sqlite-web-staging"
-      - "traefik.http.middlewares.stripprefix-sqlite-web-staging.stripprefix.prefixes=/sqlite-web/staging"
+      - "traefik.http.routers.sqlite_web_staging.middlewares=dashboard-auth@file"
       - "traefik.http.services.sqlite_web_staging.loadbalancer.server.port=8080"
     networks:
       - web
@@ -53,13 +54,14 @@ services:
       - "/var/randovania/production/data:/data"
     environment:
       SQLITE_DATABASE: data.db
+    command: 
+      - "-u /sqlite-web/production"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sqlite_web_production.rule=Host(`${DOMAIN}`) && PathPrefix(`/sqlite-web/production`)"
       - "traefik.http.routers.sqlite_web_production.entrypoints=websecure"
       - "traefik.http.routers.sqlite_web_production.tls.certresolver=myresolver"
-      - "traefik.http.routers.sqlite_web_production.middlewares=dashboard-auth@file,stripprefix-sqlite-web-production"
-      - "traefik.http.middlewares.stripprefix-sqlite-web-production.stripprefix.prefixes=/sqlite-web/production"
+      - "traefik.http.routers.sqlite_web_production.middlewares=dashboard-auth@file"
       - "traefik.http.services.sqlite_web_production.loadbalancer.server.port=8080"
     networks:
       - web
