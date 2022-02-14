@@ -93,7 +93,7 @@ services:
       - web
 
   traefik:
-    image: "traefik:v2.5"
+    image: "traefik:v2.6"
     container_name: "traefik"
     command:
       - "--accesslog=true"
