@@ -25,7 +25,7 @@ services:
       - traefik.enable=true
       - traefik.constraint-label=traefik-public
       - traefik.http.routers.node_exporter.rule=Host(`${DOMAIN}`) && PathPrefix(`/host-metrics`)
-      - traefik.http.routers.node_exporter.entrypoints=https
+      - traefik.http.routers.node_exporter.entrypoints=websecure
       - traefik.http.routers.node_exporter.tls.certresolver=le
       - traefik.http.routers.node_exporter.middlewares=admin-auth
       - traefik.http.services.node_exporter.loadbalancer.server.port=9100
@@ -147,5 +147,3 @@ services:
       # Use the public network created to be shared between Traefik and
       # any other service that needs to be publicly available with HTTPS
       - traefik-public
-    
-    restart: always
