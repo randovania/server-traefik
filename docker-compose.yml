@@ -6,9 +6,6 @@ networks:
   traefik-public:
     external: true
 
-  web:
-    external: true
-
 volumes:
   # Create a volume to store the certificates, there is a constraint to make sure
   # Traefik is always deployed to the same Docker node with the same volume containing
@@ -19,24 +16,23 @@ services:
   node-exporter:
     image: "quay.io/prometheus/node-exporter"
     pid: host
-    restart: always
     volumes:
       - "/:/host:ro,rslave"
     command:
       - "--path.rootfs=/host"
       - "--web.telemetry-path=/host-metrics"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.node_exporter.rule=Host(`${DOMAIN}`) && PathPrefix(`/host-metrics`)"
-      - "traefik.http.routers.node_exporter.entrypoints=websecure"
-      - "traefik.http.routers.node_exporter.tls.certresolver=myresolver"
-      - "traefik.http.routers.node_exporter.middlewares=dashboard-auth@file"
-      - "traefik.http.services.node_exporter.loadbalancer.server.port=9100"
+      - traefik.enable=true
+      - traefik.constraint-label=traefik-public
+      - traefik.http.routers.node_exporter.rule=Host(`${DOMAIN}`) && PathPrefix(`/host-metrics`)
+      - traefik.http.routers.node_exporter.entrypoints=https
+      - traefik.http.routers.node_exporter.tls.certresolver=le
+      - traefik.http.routers.node_exporter.middlewares=admin-auth
+      - traefik.http.services.node_exporter.loadbalancer.server.port=9100
     networks:
-      - web
+      - traefik-public
 
   traefik:
-    container_name: "traefik"
     image: "traefik:v2.7"
 
     # For now, don't expose ports. We're expected to be proxied by the non-swarm traefik.
@@ -148,8 +144,6 @@ services:
       - DASHBOARD_PASSWORD
     
     networks:
-      - web
-
       # Use the public network created to be shared between Traefik and
       # any other service that needs to be publicly available with HTTPS
       - traefik-public
