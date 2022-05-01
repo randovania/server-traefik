@@ -21,26 +21,33 @@ services:
     command:
       - "--path.rootfs=/host"
       - "--web.telemetry-path=/host-metrics"
-    labels:
-      - traefik.enable=true
-      - traefik.constraint-label=traefik-public
-      - traefik.http.routers.node_exporter.rule=Host(`${DOMAIN}`) && PathPrefix(`/host-metrics`)
-      - traefik.http.routers.node_exporter.entrypoints=websecure
-      - traefik.http.routers.node_exporter.tls.certresolver=le
-      - traefik.http.routers.node_exporter.middlewares=admin-auth
-      - traefik.http.services.node_exporter.loadbalancer.server.port=9100
+
     networks:
       - traefik-public
-
+    
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.traefik-public.traefik-public-certificates == true
+      labels:
+        - traefik.enable=true
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.node_exporter.rule=Host(`${DOMAIN}`) && PathPrefix(`/host-metrics`)
+        - traefik.http.routers.node_exporter.entrypoints=websecure
+        - traefik.http.routers.node_exporter.tls.certresolver=le
+        - traefik.http.routers.node_exporter.middlewares=admin-auth
+        - traefik.http.services.node_exporter.loadbalancer.server.port=9100
+    
   traefik:
     image: "traefik:v2.7"
 
-    # For now, don't expose ports. We're expected to be proxied by the non-swarm traefik.
-    # ports:
-    #   # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
-    #   - 80:80
-    #   # Listen on port 443, default for HTTPS
-    #   - 443:443
+    ports:
+      # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
+      - 80:80
+      # Listen on port 443, default for HTTPS
+      - 443:443
 
     deploy:
       placement:
