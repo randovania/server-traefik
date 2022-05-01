@@ -122,10 +122,6 @@ services:
       # Do not expose all Docker services, only the ones explicitly exposed
       - --providers.docker.exposedbydefault=false
 
-      # Add additional providers listed in the file
-      - "--providers.file.directory=/file-providers"
-      - "--providers.file.watch=true"
-
       # Create an entrypoint "web" listening on port 80
       - --entrypoints.web.address=:80
 
