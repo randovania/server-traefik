@@ -45,9 +45,14 @@ services:
 
     ports:
       # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
-      - 80:80
+      - target: 80
+        published: 80
+        mode: host
+        
       # Listen on port 443, default for HTTPS
-      - 443:443
+      - target: 443
+        published: 443
+        mode: host
 
     deploy:
       placement:
@@ -121,8 +126,6 @@ services:
       - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Do not expose all Docker services, only the ones explicitly exposed
       - --providers.docker.exposedbydefault=false
-      # Route traffic to the services via the correct network
-      - --providers.docker.network=traefik-public
 
       # Create an entrypoint "web" listening on port 80
       - --entrypoints.web.address=:80
